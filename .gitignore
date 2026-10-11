@@ -1,0 +1,8 @@
+# Your own settings, including database passwords.
+# This file stays on your computer and your web host, never on GitHub.
+config/config.php
+
+# Windows and editor files
+Thumbs.db
+desktop.ini
+.vscode/

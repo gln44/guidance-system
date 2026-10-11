@@ -1,0 +1,77 @@
+/* Printable pages: student lists and session lists */
+
+:root {
+    --ink: #2B2427;
+    --ink-soft: #6B5D60;
+    --line: #D9CFCD;
+    --brand: #7B1E2E;
+    --sans: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: #EDE8E7; color: var(--ink); font-family: var(--sans); font-size: 10.5pt; line-height: 1.4; }
+
+.print-toolbar {
+    position: sticky; top: 0; z-index: 1;
+    display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;
+    padding: 0.75rem 1.25rem; background: #fff; border-bottom: 1px solid var(--line);
+    font-size: 0.9rem; color: var(--ink-soft);
+}
+.btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font: inherit; font-weight: 700; font-size: 0.9rem; color: var(--ink);
+    padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #CDBCBA; background: #fff;
+    text-decoration: none; cursor: pointer;
+}
+.btn-primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+.icon { width: 1.1em; height: 1.1em; flex: none; }
+
+.sheet { background: #fff; max-width: 1100px; margin: 1.5rem auto; padding: 14mm; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08); }
+
+.letterhead { display: flex; align-items: center; gap: 0.75rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--brand); margin-bottom: 1rem; }
+.letterhead .logo { width: 52px; height: 52px; object-fit: contain; }
+.letterhead strong { display: block; font-size: 12.5pt; }
+.letterhead span { color: var(--ink-soft); }
+.confidential-mark {
+    margin: 0 0 0 auto; padding: 0.2rem 0.6rem; border: 1.5px solid var(--brand); color: var(--brand);
+    font-weight: 700; font-size: 9pt; letter-spacing: 0.04em; border-radius: 3px;
+}
+h1 { font-family: var(--serif); font-weight: 600; font-size: 17pt; margin: 0 0 0.2rem; }
+.print-details { margin: 0 0 1rem; color: var(--ink-soft); }
+.print-details span { margin: 0 0.4rem; color: var(--line); }
+
+table { width: 100%; border-collapse: collapse; }
+thead { display: table-header-group; } /* repeat the header on every page */
+th { text-align: left; font-size: 9pt; color: var(--ink-soft); border-bottom: 1.5px solid var(--ink); padding: 0.35rem 0.4rem; }
+td { border-bottom: 1px solid var(--line); padding: 0.35rem 0.4rem; vertical-align: top; }
+tr { break-inside: avoid; }
+td.num { color: var(--ink-soft); text-align: right; width: 2.5rem; }
+.sub { display: block; color: var(--ink-soft); font-size: 9pt; }
+.nowrap { white-space: nowrap; }
+.empty { color: var(--ink-soft); padding: 1rem 0; }
+
+/* Full session records */
+.record { border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem 0.9rem; margin-bottom: 0.9rem; break-inside: avoid; }
+.record-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 0.4rem; margin-bottom: 0.5rem; }
+.record-head strong { font-size: 11.5pt; }
+.record dl { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.25rem 0.75rem; margin: 0; }
+.record dt { font-weight: 700; font-size: 9.5pt; }
+.record dd { margin: 0; font-family: var(--serif); white-space: pre-line; }
+.record dd.muted { color: var(--ink-soft); font-family: var(--sans); }
+
+/* Signature lines at the bottom of printouts */
+.signatories { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-top: 2.5rem; break-inside: avoid; }
+.signer { display: flex; flex-direction: column; flex: 1 1 0; min-width: 9rem; max-width: 15rem; }
+.signer-label { font-size: 0.85em; color: #555; margin-bottom: 2.6rem; }
+.signature-line { border-bottom: 1px solid #000; margin-bottom: 0.3rem; }
+.signer-name { text-transform: uppercase; letter-spacing: 0.02em; }
+.signer-title { font-size: 0.9em; color: #555; }
+
+.print-footer { margin-top: 1.25rem; padding-top: 0.5rem; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 8.5pt; }
+
+@media print {
+    body { background: #fff; }
+    .print-toolbar { display: none; }
+    .sheet { box-shadow: none; margin: 0; padding: 0; max-width: none; }
+    a { color: inherit; text-decoration: none; }
+}
