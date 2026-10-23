@@ -60,7 +60,7 @@ td.num { color: var(--ink-soft); text-align: right; width: 2.5rem; }
 .record dd.muted { color: var(--ink-soft); font-family: var(--sans); }
 
 /* Signature lines at the bottom of printouts */
-.signatories { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-top: 2.5rem; break-inside: avoid; }
+.signatories { display: flex; gap: 1.25rem; flex-wrap: wrap; justify-content: space-between; margin-top: 2.5rem; break-inside: avoid; }
 .signer { display: flex; flex-direction: column; flex: 1 1 0; min-width: 9rem; max-width: 15rem; }
 .signer-label { font-size: 0.85em; color: #555; margin-bottom: 2.6rem; }
 .signature-line { border-bottom: 1px solid #000; margin-bottom: 0.3rem; }

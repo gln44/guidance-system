@@ -2,6 +2,9 @@
 # This file stays on your computer and your web host, never on GitHub.
 config/config.php
 
+# Student photos are personal information; they stay on the computer / web host only.
+uploads/
+
 # Windows and editor files
 Thumbs.db
 desktop.ini

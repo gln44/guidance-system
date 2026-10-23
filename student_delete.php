@@ -16,6 +16,10 @@ if ((int) $stmt->fetchColumn() > 0) {
     redirect('student_view.php?id=' . $id);
 }
 
+$stmt = db()->prepare('SELECT photo FROM students WHERE id = ?');
+$stmt->execute([$id]);
+$photo = $stmt->fetchColumn();
 db()->prepare('DELETE FROM students WHERE id = ?')->execute([$id]);
+delete_student_photo_file($photo ?: null);
 flash('success', 'Student record deleted.');
 redirect('students.php');
