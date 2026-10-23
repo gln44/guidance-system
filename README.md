@@ -35,6 +35,50 @@ Free hosting is fine for testing and class demos. Real counseling records are se
 personal information, so for actual use the school should host it on paid hosting or its
 own server with HTTPS and regular backups.
 
+## Putting it online with Vercel (to share with others)
+
+Vercel gives the system a free public link, like `https://guidance-system.vercel.app`, and updates
+it every time you push to GitHub. You can keep running it on XAMPP at the same time; nothing about
+the XAMPP setup changes. Vercel doesn't keep a database, so the data lives in a free online MySQL
+database (TiDB Cloud). Use made-up students only: anyone with the link can see the login page.
+
+**1. Make the online database (TiDB Cloud)**
+
+1. Sign up at https://tidbcloud.com and create a **Serverless** (free) cluster.
+2. Click **Connect**. Choose **General** as the connection type and click **Generate Password**.
+   Note the **host**, **port** (4000), **user**, and **password** it shows.
+3. Open **SQL Editor**, run `CREATE DATABASE guidance_db;`, then `USE guidance_db;`,
+   then paste in all of `database/schema-online.sql` and run it.
+
+**2. Put it on Vercel**
+
+1. Sign up at https://vercel.com with your GitHub account.
+2. Click **Add New > Project** and **Import** this repository. Leave Framework Preset as **Other**
+   and the build settings empty.
+3. Open **Environment Variables** and add:
+
+   | Name | Value |
+   |---|---|
+   | `DB_HOST` | the host from TiDB |
+   | `DB_PORT` | `4000` |
+   | `DB_NAME` | `guidance_db` |
+   | `DB_USER` | the user from TiDB (it looks like `xxxx.root`) |
+   | `DB_PASS` | the password from TiDB |
+   | `DB_SSL` | `true` |
+   | `SCHOOL_NAME` | your school's name |
+   | `APP_TIMEZONE` | your timezone, e.g. `Asia/Manila` |
+   | `LOGO_PATH` | optional, e.g. `assets/img/cviflogo.png` |
+
+4. Click **Deploy**. When it finishes, open the link right away and create the administrator
+   account on the setup page, before you share the link (the first visitor to that page becomes the admin).
+
+Changed a variable later? Go to **Deployments**, open the menu on the latest one, and click **Redeploy**.
+
+How it works: Vercel only runs PHP files inside `api/`, so `vercel.json` sends every page request
+to `api/index.php`, which opens the matching page. Without a `config/config.php`, the settings
+come from the environment variables above. Logins are kept in the database (`php_sessions` table,
+created automatically) because Vercel doesn't keep files between visits.
+
 ## Grade and section buttons
 
 The **Students** page has a button for each grade level. Click one to list only that grade,
@@ -102,6 +146,8 @@ On the **Students** page, click **Import from file**.
 |---|---|
 | `config/config.php` | Database login, school name, timezone, dropdown choices |
 | `includes/bootstrap.php` | Loaded by every page: session, database, login checks, security helpers |
+| `includes/db_session.php` | Keeps logins in the database when running on Vercel |
+| `vercel.json`, `api/index.php` | Vercel settings and the entry point that opens each page there |
 | `includes/header.php`, `footer.php` | Shared sidebar and page layout |
 | `setup.php` | One-time page that creates the first administrator |
 | `login.php`, `logout.php` | Logging in and out |
