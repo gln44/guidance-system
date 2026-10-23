@@ -125,8 +125,10 @@ on their session pages, and at true 2 x 2 inch size on a printed student record.
 - Cropping uses PHP's GD extension, which XAMPP and most hosts include. Without GD the original
   picture is kept and still shown as a square.
 - On Vercel, photos are kept in the database instead (`student_photos` table, created
-  automatically), because Vercel doesn't keep saved files. Vercel's PHP has no GD, so photos
-  there are not cropped or shrunk, and uploads over about 4 MB are refused by Vercel.
+  automatically), because Vercel doesn't keep saved files.
+- Before uploading, the browser crops the photo to a square and shrinks it to 600 x 600
+  (`assets/js/app.js`). This keeps uploads small enough for Vercel, which refuses requests over
+  about 4.5 MB and whose PHP has no GD to crop photos itself.
 
 ## Phones
 

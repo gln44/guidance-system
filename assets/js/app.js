@@ -46,6 +46,49 @@ document.querySelectorAll('tr[data-href]').forEach(function (row) {
         preview.appendChild(img);
         var remove = document.getElementById('photo-remove');
         if (remove) remove.checked = false;
+        shrinkPhoto(file);
+    });
+
+    // Phone photos are often several MB, which is too big for some hosts such as Vercel.
+    // So the browser crops the photo to a square (the same way the server does) and
+    // shrinks it to 600 x 600 before uploading. If that fails, the original is uploaded.
+    var pending = null;
+    function shrinkPhoto(file) {
+        if (!window.DataTransfer || !HTMLCanvasElement.prototype.toBlob) return;
+        pending = new Promise(function (done) {
+            var img = new Image();
+            img.onerror = function () { done(); };
+            img.onload = function () {
+                var side = Math.min(img.naturalWidth, img.naturalHeight);
+                var size = Math.min(600, side);
+                var canvas = document.createElement('canvas');
+                canvas.width = canvas.height = size;
+                var ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#fff'; // white behind see-through PNGs
+                ctx.fillRect(0, 0, size, size);
+                ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) * 0.3,
+                    side, side, 0, 0, size, size);
+                canvas.toBlob(function (blob) {
+                    if (blob && input.files[0] === file) {
+                        var list = new DataTransfer();
+                        list.items.add(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
+                        input.files = list.files;
+                    }
+                    done();
+                }, 'image/jpeg', 0.88);
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
+    // If Save is clicked while the photo is still being shrunk, wait for it first
+    input.form.addEventListener('submit', function (event) {
+        if (!pending) return;
+        event.preventDefault();
+        pending.then(function () {
+            pending = null;
+            input.form.submit();
+        });
     });
 })();
 
