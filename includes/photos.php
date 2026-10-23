@@ -25,9 +25,39 @@ function ensure_photo_column(): void
     $done = true;
 }
 
-// The private folder for photos (created, with its "do not serve" rule, if missing)
+// On Vercel, saved files disappear between visits, so photos are kept in the database
+// (student_photos table, created automatically) instead of in uploads/student-photos/.
+function photos_in_db(): bool
+{
+    return (bool) getenv('VERCEL');
+}
+
+function ensure_photo_table(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    db()->exec("
+        CREATE TABLE IF NOT EXISTS student_photos (
+            file_name VARCHAR(100) NOT NULL PRIMARY KEY,
+            data      MEDIUMBLOB   NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+    $done = true;
+}
+
+// The private folder for photos (created, with its "do not serve" rule, if missing).
+// On Vercel it is only a temporary place to prepare the photo before it goes into the database.
 function photo_dir(): string
 {
+    if (photos_in_db()) {
+        $dir = sys_get_temp_dir() . '/student-photos';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0700, true);
+        }
+        return $dir;
+    }
     $uploads = __DIR__ . '/../uploads';
     $dir = $uploads . '/student-photos';
     if (!is_dir($dir)) {
@@ -126,7 +156,7 @@ function save_student_photo(?array $file, string &$error): ?string
             $error = 'The photo could not be saved. Check that the uploads folder can be written to.';
             return null;
         }
-        return "$name.jpg";
+        return finish_saving_photo("$name.jpg");
     }
 
     // Without PHP's image tools (GD), keep the original picture; it is still shown as a square
@@ -135,12 +165,43 @@ function save_student_photo(?array $file, string &$error): ?string
         $error = 'The photo could not be saved. Check that the uploads folder can be written to.';
         return null;
     }
-    return $file_name;
+    return finish_saving_photo($file_name);
+}
+
+// On Vercel, moves the prepared photo from the temporary folder into the database
+function finish_saving_photo(string $fileName): string
+{
+    if (photos_in_db()) {
+        $path = photo_dir() . '/' . $fileName;
+        ensure_photo_table();
+        db()->prepare('INSERT INTO student_photos (file_name, data) VALUES (?, ?)')
+            ->execute([$fileName, file_get_contents($path)]);
+        @unlink($path);
+    }
+    return $fileName;
+}
+
+// The photo's picture data, or null if it can't be found
+function student_photo_data(string $fileName): ?string
+{
+    $fileName = basename($fileName);
+    if (photos_in_db()) {
+        ensure_photo_table();
+        $stmt = db()->prepare('SELECT data FROM student_photos WHERE file_name = ?');
+        $stmt->execute([$fileName]);
+        $data = $stmt->fetchColumn();
+        return $data === false ? null : (string) $data;
+    }
+    $path = photo_dir() . '/' . $fileName;
+    return is_file($path) ? (string) file_get_contents($path) : null;
 }
 
 function delete_student_photo_file(?string $fileName): void
 {
-    if ($fileName) {
+    if ($fileName && photos_in_db()) {
+        ensure_photo_table();
+        db()->prepare('DELETE FROM student_photos WHERE file_name = ?')->execute([basename($fileName)]);
+    } elseif ($fileName) {
         $path = photo_dir() . '/' . basename($fileName);
         if (is_file($path)) {
             @unlink($path);

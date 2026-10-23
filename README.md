@@ -124,6 +124,9 @@ on their session pages, and at true 2 x 2 inch size on a printed student record.
   when moving to a web host. It is listed in `.gitignore`, so photos never go to GitHub.
 - Cropping uses PHP's GD extension, which XAMPP and most hosts include. Without GD the original
   picture is kept and still shown as a square.
+- On Vercel, photos are kept in the database instead (`student_photos` table, created
+  automatically), because Vercel doesn't keep saved files. Vercel's PHP has no GD, so photos
+  there are not cropped or shrunk, and uploads over about 4 MB are refused by Vercel.
 
 ## Phones
 
