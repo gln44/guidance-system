@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS students (
   address          VARCHAR(255) NULL,
   guardian_name    VARCHAR(100) NULL,
   guardian_contact VARCHAR(30)  NULL,
+  photo            VARCHAR(100) NULL,
   created_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_student_name (last_name, first_name)

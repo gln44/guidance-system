@@ -7,6 +7,7 @@ if (file_exists(__DIR__ . '/../config/config.php')) {
 } else {
     require_once __DIR__ . '/../config/config.example.php';
 }
+require_once __DIR__ . '/photos.php';
 
 // ---------- Session (secure cookie settings) ----------
 if (session_status() === PHP_SESSION_NONE) {
@@ -326,6 +327,7 @@ function require_login(): void
         'role'      => $fresh['role'],
     ];
     $_SESSION['last_activity'] = time();
+    ensure_photo_column();
 }
 
 function require_admin(): void

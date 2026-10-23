@@ -4,7 +4,7 @@ require_login();
 
 $id = (int) ($_GET['id'] ?? 0);
 $stmt = db()->prepare("
-    SELECT cs.*, s.student_no, s.first_name, s.last_name, s.middle_name, s.sex, s.birthdate,
+    SELECT cs.*, s.student_no, s.first_name, s.last_name, s.middle_name, s.sex, s.birthdate, s.photo,
            s.course, s.year_level, s.section, s.contact_no, s.email, s.address, s.guardian_name, s.guardian_contact,
            c.full_name AS counselor
     FROM counseling_sessions cs
@@ -80,8 +80,10 @@ require __DIR__ . '/includes/header.php';
         <div class="print-head">
             <img class="logo" src="<?= e(LOGO_PATH) ?>" alt="">
             <div><strong><?= e(SCHOOL_NAME) ?></strong><br><?= e(APP_NAME) ?></div>
+            <span class="print-mark">Confidential</span>
         </div>
-        <p class="confidential">Confidential counseling record.</p>
+        <p class="print-title print-only">Counseling Session Record</p>
+        <p class="confidential no-print">Confidential counseling record.</p>
 
         <div class="folder-title row">
             <div>
@@ -93,6 +95,8 @@ require __DIR__ . '/includes/header.php';
 
         <section class="record-block">
             <h2 class="block-title">Personal details</h2>
+            <div class="details-with-photo">
+            <?= student_photo($session, 'photo-md') ?>
             <dl class="details">
                 <?php foreach ($personal as $label => $value): ?>
                     <div<?= in_array($label, ['Email', 'Address', 'Parent / guardian'], true) ? ' class="wide"' : '' ?>>
@@ -101,6 +105,7 @@ require __DIR__ . '/includes/header.php';
                     </div>
                 <?php endforeach; ?>
             </dl>
+            </div>
         </section>
 
         <section class="record-block">
@@ -112,6 +117,9 @@ require __DIR__ . '/includes/header.php';
                 <div><dt>How the student came in</dt><dd><?= e($session['referral_source']) ?></dd></div>
                 <div class="wide"><dt>Status</dt><dd><?= status_text($session['status'], $session['status'] === 'Follow-up' ? $session['follow_up_date'] : null) ?></dd></div>
             </dl>
+        </section>
+
+        <div class="record-notes">
         <?php foreach ($sections as $label => $body): ?>
             <section class="note-section">
                 <h2><?= e($label) ?></h2>
@@ -129,8 +137,7 @@ require __DIR__ . '/includes/header.php';
                 Last edited <?= e(date('M j, Y g:i A', strtotime($session['updated_at']))) ?>.
             <?php endif; ?>
         </p>
-
-        </section>
+        </div>
 
         <div class="print-only">
             <?= signatories('Counseled by', $session['counselor'], 'session_record') ?>

@@ -111,6 +111,20 @@ A checklist on the same page chooses which signatures go on each kind of printou
 session record, student list).
 Print pages open the print dialog automatically; choose "Save as PDF" to make a PDF instead.
 
+## Student photos (2x2)
+
+Add or change a student's photo on **Add student / Edit details**. Pictures (JPG, PNG, or WebP,
+up to 5 MB) are cropped to a square like a 2x2 ID photo, resized, and saved without hidden data
+such as location. The photo shows on the student's page, beside their name in the Students list,
+on their session pages, and at true 2 x 2 inch size on a printed student record.
+
+- Photos are stored in `uploads/student-photos/`. That folder is blocked from direct access
+  (`uploads/.htaccess`); photos are only shown through `student_photo.php` to logged-in counselors.
+- The folder is created automatically. Back it up together with the database, and upload it
+  when moving to a web host. It is listed in `.gitignore`, so photos never go to GitHub.
+- Cropping uses PHP's GD extension, which XAMPP and most hosts include. Without GD the original
+  picture is kept and still shown as a square.
+
 ## Phones
 
 The system adjusts to phone screens. To see the full desktop layout on a phone, tap
@@ -160,6 +174,8 @@ On the **Students** page, click **Import from file**.
 | `includes/print.php`, `assets/css/print.css` | Layout for printed lists |
 | `student_form.php` | Add or edit a student |
 | `student_view.php` | Student profile and counseling history |
+| `student_photo.php` | Shows a student's photo to logged-in counselors |
+| `includes/photos.php` | Saving, cropping, and showing student photos |
 | `student_delete.php` | Deletes a student with no sessions (admin only) |
 | `sessions.php` | All sessions, with search and filters |
 | `session_form.php` | Record or edit a session |

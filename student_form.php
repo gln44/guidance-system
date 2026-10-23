@@ -6,7 +6,7 @@ $fields = ['student_no', 'last_name', 'first_name', 'middle_name', 'sex', 'birth
            'section', 'contact_no', 'email', 'address', 'guardian_name', 'guardian_contact'];
 
 $id = (int) ($_GET['id'] ?? 0);
-$student = array_fill_keys($fields, '');
+$student = array_fill_keys($fields, '') + ['id' => 0, 'photo' => null];
 
 if ($id) {
     $stmt = db()->prepare('SELECT * FROM students WHERE id = ?');
@@ -37,6 +37,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$student['student_no'], $id]);
     if ($stmt->fetch()) $errors[] = 'Another student already has student number ' . $student['student_no'] . '.';
 
+    // Photo: a new one replaces the old one; "Remove photo" clears it
+    $newPhoto = null;
+    $choseAPhoto = ($_FILES['photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+    if (!$errors && $choseAPhoto) {
+        $photoError = '';
+        $newPhoto = save_student_photo($_FILES['photo'], $photoError);
+        if ($photoError !== '') {
+            $errors[] = $photoError;
+        }
+    } elseif ($errors && $choseAPhoto) {
+        $errors[] = 'Choose the photo again after fixing the other problems.';
+    }
+
     if (!$errors) {
         $values = [];
         foreach ($fields as $f) {
@@ -48,11 +61,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $values[] = $id;
             db()->prepare("UPDATE students SET $set WHERE id = ?")->execute($values);
             flash('success', 'Student record updated.');
+            $oldPhoto = $student['photo'] ?? null;
+            if ($newPhoto !== null || !empty($_POST['remove_photo'])) {
+                db()->prepare('UPDATE students SET photo = ? WHERE id = ?')->execute([$newPhoto, $id]);
+                if ($oldPhoto && $oldPhoto !== $newPhoto) {
+                    delete_student_photo_file($oldPhoto);
+                }
+            }
         } else {
             $cols = implode(', ', $fields);
             $qs   = implode(', ', array_fill(0, count($fields), '?'));
             db()->prepare("INSERT INTO students ($cols) VALUES ($qs)")->execute($values);
             $id = (int) db()->lastInsertId();
+            if ($newPhoto !== null) {
+                db()->prepare('UPDATE students SET photo = ? WHERE id = ?')->execute([$newPhoto, $id]);
+            }
             flash('success', 'Student added.');
         }
         redirect('student_view.php?id=' . $id);
@@ -80,8 +103,26 @@ require __DIR__ . '/includes/header.php';
     <div class="flash flash-error" role="alert"><?= e($err) ?></div>
 <?php endforeach; ?>
 
-<form method="post" class="panel form">
+<form method="post" class="panel form" enctype="multipart/form-data">
     <?= csrf_field() ?>
+
+    <fieldset>
+        <legend>Photo</legend>
+        <div class="photo-field">
+            <div class="photo-preview" id="photo-preview">
+                <?= student_photo($student) ?>
+            </div>
+            <div class="photo-controls">
+                <label>2x2 photo
+                    <input type="file" name="photo" id="photo-input" accept="image/jpeg,image/png,image/webp">
+                    <span class="hint">A JPG, PNG, or WebP picture up to 5 MB. It is cropped to a square like a 2x2 ID photo. On a phone you can take one with the camera.</span>
+                </label>
+                <?php if (!empty($student['photo'])): ?>
+                    <label class="check"><input type="checkbox" name="remove_photo" value="1" id="photo-remove"> Remove the current photo</label>
+                <?php endif; ?>
+            </div>
+        </div>
+    </fieldset>
 
     <fieldset>
         <legend>Student</legend>

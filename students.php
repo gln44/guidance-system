@@ -246,8 +246,13 @@ require __DIR__ . '/includes/header.php';
                     <tr class="row-link" data-href="student_view.php?id=<?= (int) $s['id'] ?>">
                         <td class="nowrap"><?= e($s['student_no']) ?></td>
                         <td class="nowrap">
+                            <div class="name-cell">
+                            <?= student_photo($s, 'photo-sm') ?>
+                            <span>
                             <a class="row-main" href="student_view.php?id=<?= (int) $s['id'] ?>"><?= e(student_name($s)) ?></a>
                             <?php if ($middle = matched_middle_name($s, $words)): ?><br><span class="muted small">Middle name: <?= e($middle) ?></span><?php endif; ?>
+                            </span>
+                            </div>
                         </td>
                         <td><?= e(grade_strand($s)) ?></td>
                         <td><?= $s['section'] ? e($s['section']) : '<span class="muted">None</span>' ?></td>
