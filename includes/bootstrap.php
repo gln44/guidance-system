@@ -1,16 +1,30 @@
 <?php
 // Loaded at the top of every page.
-require_once __DIR__ . '/../config/config.php';
+// config.php is your own copy (XAMPP or web host). Without one, as on Vercel,
+// the example file is used and reads its settings from environment variables.
+if (file_exists(__DIR__ . '/../config/config.php')) {
+    require_once __DIR__ . '/../config/config.php';
+} else {
+    require_once __DIR__ . '/../config/config.example.php';
+}
 
 // ---------- Session (secure cookie settings) ----------
 if (session_status() === PHP_SESSION_NONE) {
+    // Vercel sits behind a proxy that tells us the visitor used HTTPS in this header
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+          || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
     session_set_cookie_params([
         'lifetime' => 0,
         'path'     => '/',
         'httponly' => true,      // JavaScript cannot read the cookie
         'samesite' => 'Lax',
-        'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'secure'   => $https,
     ]);
+    // Vercel forgets saved files between requests, so logins are kept in the database there
+    if (getenv('VERCEL')) {
+        require_once __DIR__ . '/db_session.php';
+        session_set_save_handler(new DbSessionHandler(), true);
+    }
     session_name('GCS_SESSION');
     session_start();
 }
@@ -26,15 +40,27 @@ function db(): PDO
     static $pdo = null;
     if ($pdo === null) {
         try {
+            $options = [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
+            ];
+            // Encrypted connection for online databases, checked against the system's certificates
+            if (defined('DB_SSL') && DB_SSL) {
+                foreach (['/etc/pki/tls/certs/ca-bundle.crt', '/etc/ssl/certs/ca-certificates.crt', '/etc/ssl/cert.pem'] as $ca) {
+                    if (is_readable($ca)) {
+                        $options[PDO::MYSQL_ATTR_SSL_CA] = $ca;
+                        break;
+                    }
+                }
+            }
+            // Older config.php files have no DB_PORT, so fall back to MySQL's usual port
+            $port = defined('DB_PORT') ? DB_PORT : '3306';
             $pdo = new PDO(
-                'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4',
+                'mysql:host=' . DB_HOST . ';port=' . $port . ';dbname=' . DB_NAME . ';charset=utf8mb4',
                 DB_USER,
                 DB_PASS,
-                [
-                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES   => false,
-                ]
+                $options
             );
         } catch (PDOException $ex) {
             http_response_code(500);
