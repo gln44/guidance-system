@@ -115,7 +115,7 @@ require __DIR__ . '/includes/header.php';
             <div class="photo-controls">
                 <label>2x2 photo
                     <input type="file" name="photo" id="photo-input" accept="image/jpeg,image/png,image/webp">
-                    <span class="hint">A JPG, PNG, or WebP picture up to 5 MB. It is cropped to a square like a 2x2 ID photo. On a phone you can take one with the camera.</span>
+                    <span class="hint">A JPG, PNG, or WebP picture. It is cropped to a square like a 2x2 ID photo and made smaller before uploading. On a phone you can take one with the camera.</span>
                 </label>
                 <?php if (!empty($student['photo'])): ?>
                     <label class="check"><input type="checkbox" name="remove_photo" value="1" id="photo-remove"> Remove the current photo</label>
