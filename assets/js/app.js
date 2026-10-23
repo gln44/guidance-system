@@ -29,6 +29,26 @@ document.querySelectorAll('tr[data-href]').forEach(function (row) {
     });
 });
 
+// Student form: show the chosen photo as a square before it is saved
+(function () {
+    var input = document.getElementById('photo-input');
+    var preview = document.getElementById('photo-preview');
+    if (!input || !preview) return;
+    var original = preview.innerHTML;
+    input.addEventListener('change', function () {
+        var file = input.files && input.files[0];
+        if (!file) { preview.innerHTML = original; return; }
+        var img = document.createElement('img');
+        img.className = 'photo-2x2';
+        img.alt = 'Preview of the chosen photo';
+        img.src = URL.createObjectURL(file);
+        preview.innerHTML = '';
+        preview.appendChild(img);
+        var remove = document.getElementById('photo-remove');
+        if (remove) remove.checked = false;
+    });
+})();
+
 // Print buttons
 document.querySelectorAll('[data-print]').forEach(function (btn) {
     btn.addEventListener('click', function () { window.print(); });

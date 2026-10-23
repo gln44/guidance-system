@@ -295,25 +295,21 @@ td.actions form.inline { display: inline; }
     align-items: center;
     gap: 0.5rem;
     padding: 0.32rem 0.75rem;
-    border: 1px solid #CFC6C4;
+    border: 1px solid var(--line-strong);
     border-radius: 0;
-    background: #E9E4E3;
+    background: var(--surface);
     color: var(--ink);
     text-decoration: none;
     font-weight: 700;
     font-size: 0.875rem;
     line-height: 1.2;
 }
-.chip:hover { background: #DED7D6; border-color: #BFB4B2; color: var(--ink); }
+.chip:hover { border-color: var(--brand); color: var(--brand-d); }
 .chip[aria-current="true"] { background: var(--brand); border-color: var(--brand); color: #fff; }
-.chip-count {
-    font-size: 0.8125rem;
-    font-weight: 400;
-    padding: 0;
-    background: none;
-    color: var(--ink-soft);
-}
-.chip[aria-current="true"] .chip-count { background: none; color: rgba(255, 255, 255, 0.85); }
+/* The number uses the same font, size and weight as the label: "Grade 7 200" */
+.chip-count { font: inherit; padding: 0; background: none; color: #8C7F82; }   /* lighter than the label */
+.chip:hover .chip-count { color: #9A7A80; }
+.chip[aria-current="true"] .chip-count { color: rgba(255, 255, 255, 0.7); }
 .chip-row-sections .chip { font-size: 0.8125rem; padding: 0.28rem 0.65rem; }
 .chip-manage { display: inline-flex; align-items: center; gap: 0.3rem; margin-left: auto; }
 
@@ -762,6 +758,29 @@ details.reset summary::-webkit-details-marker { display: none; }
     .sig-row-label { margin-top: 0.75rem; }
 }
 
+/* ---------- Student photos (2x2) ---------- */
+
+.photo-2x2 {
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+    width: 7.5rem; height: 7.5rem; object-fit: cover; object-position: center 30%;
+    border: 1px solid var(--line-strong); background: var(--paper);
+}
+.photo-empty { color: var(--ink-soft); font-weight: 700; font-size: 1.75rem; letter-spacing: 0.04em; background: var(--tab); }
+.photo-md { width: 5.5rem; height: 5.5rem; font-size: 1.25rem; }
+.photo-sm { width: 2.25rem; height: 2.25rem; font-size: 0.75rem; border-radius: 0; }
+.title-with-photo { display: flex; gap: 1.25rem; align-items: flex-start; }
+.details-with-photo { display: flex; gap: 1.25rem; align-items: flex-start; }
+.details-with-photo .details { flex: 1; min-width: 0; }
+.name-cell { display: flex; align-items: center; gap: 0.6rem; }
+.photo-field { display: flex; gap: 1.25rem; align-items: flex-start; flex-wrap: wrap; }
+.photo-controls { flex: 1 1 18rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.photo-controls input[type="file"] { max-width: 28rem; }
+@media (max-width: 760px) {
+    .title-with-photo { gap: 0.9rem; }
+    .title-with-photo .photo-2x2 { width: 5.5rem; height: 5.5rem; }
+    .details-with-photo { flex-direction: column; }
+}
+
 /* ---------- Printing a session record ---------- */
 
 @media print {
@@ -774,7 +793,36 @@ details.reset summary::-webkit-details-marker { display: none; }
     .status { border: 1px solid currentColor; }
     a { color: inherit; text-decoration: none; }
     .confidential { font-weight: 700; color: #000; }
-    .print-head { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+    /* Letterhead: logo and school on the left, CONFIDENTIAL on the right, a maroon rule under it */
+    .print-head {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding-bottom: 0.5rem; margin-bottom: 0.6rem; border-bottom: 2px solid var(--brand);
+    }
+    .print-mark {
+        margin-left: auto; padding: 0.15rem 0.55rem; border: 1.5px solid var(--brand); color: var(--brand);
+        font-weight: 700; font-size: 8.5pt; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .print-title { font-weight: 700; font-size: 9pt; letter-spacing: 0.08em; text-transform: uppercase; color: #555; margin-bottom: 0.4rem; }
+    .confidential.no-print { display: none !important; }
+
+    /* No big outer box on paper, so no border is ever cut where a page ends */
+    .folder-tab { display: none !important; }
+    .folder-body { border: none !important; padding: 0 !important; border-radius: 0; }
+    .panel { border: none !important; padding: 0 !important; }
+
+    /* Personal details and session details: each in its own box that never splits across pages */
+    .record-block { border: 1px solid #9a9a9a !important; padding: 0.5rem 0.75rem 0.6rem !important; margin: 0 0 0.6rem !important; break-inside: avoid; }
+    .record-block + .record-block { margin-top: 0 !important; }
+    .record-block .details { padding-bottom: 0 !important; }
+
+    /* Notes run the full width; a heading always stays with its text */
+    .record-notes .note-section { border-top: none; padding: 0.35rem 0 0.25rem; }
+    .record-notes .note-section h2 { border-bottom: 1px solid #c8c8c8; padding-bottom: 0.15rem; margin-bottom: 0.3rem; break-after: avoid; }
+    .note-text { max-width: none !important; }
+    .note-section p { orphans: 3; widows: 3; }
+
+    /* Signatures spread evenly across the page */
+    .signatories { justify-content: space-between; }
     /* Tighter spacing on paper so short records fit on one page */
     @page { margin: 12mm; }
     body { font-size: 10.5pt; }
@@ -796,6 +844,11 @@ details.reset summary::-webkit-details-marker { display: none; }
     .details dt { font-size: 8pt; }
     .details dd { font-size: 9.5pt; }
     .details .wide { grid-column: span 2; }
+    /* A real 2 x 2 inch photo on a printed student record; smaller on a session record */
+    .title-with-photo .photo-2x2 { width: 2in; height: 2in; }
+    .details-with-photo .photo-2x2 { width: 1.25in; height: 1.25in; }
+    .photo-2x2 { border-color: #888; }
+    .photo-empty { display: none !important; }
     .status { display: none !important; }
     .status-text { font-size: 9.5pt; }
     .record-block { padding-top: 0.5rem; margin-top: 0.25rem; }

@@ -69,15 +69,19 @@ require __DIR__ . '/includes/header.php';
         <div class="print-head">
             <img class="logo" src="<?= e(LOGO_PATH) ?>" alt="">
             <div><strong><?= e(SCHOOL_NAME) ?></strong><br><?= e(APP_NAME) ?></div>
+            <span class="print-mark">Confidential</span>
         </div>
-        <p class="confidential print-only">Confidential student record.</p>
+        <p class="print-title print-only">Student Record</p>
         <div class="folder-title row">
-            <div>
+            <div class="title-with-photo">
+                <?= student_photo($student) ?>
+                <div>
                 <h1><?= e(student_name($student, false)) ?></h1>
                 <p class="muted"><?= count($sessions) ?> counseling session<?= count($sessions) === 1 ? '' : 's' ?> on file</p>
                 <?php if ($counseledByText): ?>
                     <p class="counseled-by"><?= icon('counselors') ?>Counseled by <?= e($counseledByText) ?></p>
                 <?php endif; ?>
+                </div>
             </div>
             <div class="button-row no-print">
                 <button type="button" class="btn" data-print><?= icon('printer') ?>Print</button>
